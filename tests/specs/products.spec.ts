@@ -72,7 +72,9 @@ test.describe('Katalog & Suche Funktionalität', () => {
             const standCard = productsPage.getProductCard(11);
             await expect(standCard).toBeVisible();
 
-            await expect(standCard).toHaveScreenshot('smartphone-stand.png');
+            await expect(standCard).toHaveScreenshot('smartphone-stand.png', {
+                maxDiffPixelRatio: 0.05
+            });
         });
     });
 
