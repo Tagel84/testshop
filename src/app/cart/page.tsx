@@ -110,7 +110,7 @@ export default function CartPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {cart.map(item => (
-                        <div key={item.id} className="card" style={{ display: 'flex', padding: '1rem', alignItems: 'center', gap: '1rem' }}>
+                        <div key={item.id} className="card" style={{ display: 'flex', padding: '1rem', alignItems: 'center', gap: '1rem' }} data-testid={`cart-item-${item.id}`}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={item.image} alt={item.name} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '4px' }} />
                             <div style={{ flex: 1 }}>

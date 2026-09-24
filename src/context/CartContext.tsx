@@ -18,6 +18,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [isInitialized, setIsInitialized] = useState(false);
 
     // Load cart from local storage on mount
     useEffect(() => {
@@ -26,12 +27,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setCart(JSON.parse(savedCart));
         }
+        setIsInitialized(true);
     }, []);
 
     // Save cart to local storage whenever it changes
     useEffect(() => {
+        if (!isInitialized) return;
         localStorage.setItem('cart', JSON.stringify(cart));
-    }, [cart]);
+    }, [cart, isInitialized]);
 
     const addToCart = (product: Product) => {
         setCart(prev => {

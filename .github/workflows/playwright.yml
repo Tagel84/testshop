@@ -1,0 +1,58 @@
+name: Playwright E2E Tests (Docker CI)
+
+on:
+  push:
+    branches: [ main, master, Michael-Jacob ]
+  pull_request:
+    branches: [ main, master, Michael-Jacob ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: "Run Playwright Tests against Docker App"
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Shop Docker Image
+        run: docker build -t testshop-app:latest .
+
+      - name: Start Shop Container
+        run: |
+          docker run -d --name shop-container -p 3000:3000 testshop-app:latest
+          timeout 60 bash -c 'until curl -s http://localhost:3000 > /dev/null; do sleep 1; done'
+
+      - name: Install Playwright Chromium Browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright Tests (incl. AI Vision)
+        env:
+          CI: true
+          SKIP_WEBSERVER: true
+          BASE_URL: http://localhost:3000
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npx playwright test --project=chromium
+
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+      - name: Stop and cleanup Docker container
+        if: always()
+        run: docker rm -f shop-container || true
